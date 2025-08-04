@@ -74,8 +74,13 @@ public class InteractiveOrderProcessor {
         if(isMember){
             System.out.print("Enter customer tier (Regular, Silver, Gold, '' for none/Regular): ");
             customerTier = sc.nextLine().toLowerCase();
+            if (!customerTier.equals("regular") && !customerTier.equals("gold") && !customerTier.equals("silver")) {
+                System.out.println("Customer is a member with invalid input, voiding discount, given regular status.");
+                customerTier = "regular";
+            }
         }else{
             System.out.println("Customer is not a member, given 'Regular' tier discount");
+            customerTier = "regular/none";
         }
 
         System.out.print("Enter shipping zone (ZoneA, ZoneB, ZoneC, unknown): ");
@@ -144,7 +149,7 @@ public class InteractiveOrderProcessor {
 
         System.out.println("--- Order Details ---");
         System.out.printf("Unit Price: %.2f\n",unitPrice);
-        System.out.printf("Quantity: %f\n",quantity);
+        System.out.printf("Quantity: %d\n",quantity);
         System.out.printf("Is Member: %b\n",isMember);
         System.out.printf("Customer Tier: %s\n",customerTier);
         System.out.printf("Shipping Zone: %s\n",shippingZone);
@@ -153,10 +158,11 @@ public class InteractiveOrderProcessor {
         System.out.println("--- Calculation Steps ---");
         System.out.printf("Initial Subtotal: $%.2f\n",initialTotal);
         System.out.printf("After Tier Discount (%s): $%.2f\n",customerTier,customerTierDiscount);
+        System.out.printf("After Quantity Discount (5 percent off if quantity >= 5): $%.2f\n",quantityDiscount);
         System.out.printf("Promo Code Discount (%s): $%.2f\n",discountCode,promoCodeDiscount);
         System.out.printf("After Small Order Surcharge: $%.2f \n",smallOrderSurcharge);
 
-        System.out.printf("Shipping Cost: $%.2f\n",shippingCost);
+        System.out.printf("Shipping Cost (Zone: %s): $%.2f\n",shippingZone,shippingCost);
         finalOrderTotal = subTotal + shippingCost;
         System.out.printf("Final Order Total: $%.2f\n",finalOrderTotal);
 
