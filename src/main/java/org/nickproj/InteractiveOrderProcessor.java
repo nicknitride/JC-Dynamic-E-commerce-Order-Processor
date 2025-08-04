@@ -18,10 +18,13 @@ public class InteractiveOrderProcessor {
         System.out.print("Enter the second string for the comparison: ");
         s2 = sc.nextLine();
 
+
+        System.out.println("String 1: "+s1);
+        System.out.println("String 2: "+s2);
         System.out.println("== Comparison (compares memory addresses, works for items interned into the string pool");
         System.out.println(s1 == s2);
 
-        System.out.println(".equals() comparison - compares the actual string content, works even with new String('')");
+        System.out.println(".equals() comparison - compares the actual string content, works even with new String('') or un-interned strings");
         System.out.println("Most-preferred due to content comparison");
         System.out.println(s1.equals(s2));
 
@@ -30,30 +33,58 @@ public class InteractiveOrderProcessor {
     }
 
     public static void main(String[] args) {
-        double unitPrice, quantity, subTotal, shippingCost = 0,finalOrderTotal;
+        double unitPrice, subTotal, shippingCost = 0,finalOrderTotal;
+        int quantity;
         double initialTotal,customerTierDiscount = 0, shippingDiscount,promoCodeDiscount = 0, quantityDiscount, smallOrderSurcharge;
         boolean isMember, shippingIsFree = false;
-        String shippingZone = "", customerTier, discountCode;
+        String shippingZone = "", customerTier = "", discountCode;
 
         System.out.println("Welcome to the Interactive Order Processor!");
         System.out.println("--- Enter Order Details ---");
         Scanner sc = new Scanner(System.in);
 
         System.out.print("Enter unit price of the SKU: ");
-        unitPrice = sc.nextDouble();
+        try{
+            unitPrice = sc.nextDouble();
+        }catch (Exception e){
+            System.out.println("Entered an invalid number.");
+            throw new RuntimeException("Ending Execution, please restart order.\n Exception: "+e);
+        }
         sc.nextLine();
 
         System.out.print("Enter quantity: ");
-        quantity = sc.nextDouble();
-        System.out.print("Is the customer a member (true/false)?: ");
-        isMember = sc.nextBoolean();
+        try{
+            quantity = sc.nextInt();
+        }catch (Exception e){
+            System.out.println("Entered an invalid number.");
+            throw new RuntimeException("Ending Execution, please restart order.\n Exception: "+e);
+        }
         sc.nextLine();
-        System.out.print("Enter customer tier (Regular, Silver, Gold): ");
-        customerTier = sc.nextLine().toLowerCase();
+
+        System.out.print("Is the customer a member (true/false)?: ");
+        try{
+            isMember = sc.nextBoolean();
+            sc.nextLine();
+        }catch (Exception e){
+            System.out.println("Invalid input, assuming non-membership by default. Please restart order if incorrect.");
+            isMember = false;
+        }
+
+
+        if(isMember){
+            System.out.print("Enter customer tier (Regular, Silver, Gold, '' for none/Regular): ");
+            customerTier = sc.nextLine().toLowerCase();
+        }else{
+            System.out.println("Customer is not a member, given 'Regular' tier discount");
+        }
+
         System.out.print("Enter shipping zone (ZoneA, ZoneB, ZoneC, unknown): ");
         shippingZone = sc.nextLine().toLowerCase();
         System.out.print("Enter your discount code (SAVE10, FREESHIP, or '' for none): ");
         discountCode = sc.nextLine();
+        if (!discountCode.equals("SAVE10") && !discountCode.equalsIgnoreCase("freeship")){
+            discountCode = "none";
+        }
 
         subTotal = unitPrice * quantity;
         initialTotal = subTotal;
@@ -66,10 +97,14 @@ public class InteractiveOrderProcessor {
             subTotal = subTotal*.85;
             customerTierDiscount = subTotal;
             isMember = true;
+        }else{
+            customerTierDiscount = subTotal;
         }
 
         if (quantity >= 5){
             subTotal = subTotal * .95;
+            quantityDiscount = subTotal;
+        }else{
             quantityDiscount = subTotal;
         }
 
@@ -78,6 +113,8 @@ public class InteractiveOrderProcessor {
             promoCodeDiscount = subTotal;
         } else if (discountCode.equalsIgnoreCase("FREESHIP")) {
             shippingIsFree = true;
+            promoCodeDiscount = subTotal;
+        }else{
             promoCodeDiscount = subTotal;
         }
 
@@ -99,6 +136,7 @@ public class InteractiveOrderProcessor {
                 }
                 default:
                     shippingCost = 25.00;
+                    shippingZone = "Unknown shipping zone";
                     break;
             }
         }
